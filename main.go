@@ -67,11 +67,69 @@ func checkIfDraw(board [][]uint8) bool {
 	}
 	return true
 }
+func checkIfWon(board [][]uint8, player uint8) bool {
+	for c := 0; c < (len(board[0]) - 3); c++ {
+		for r := 0; r < len(board); r++ {
+			if board[r][c] == player && board[r][c+1] == player && board[r][c+2] == player && board[r][c+3] == player {
+				return true
+			}
+		}
+	}
+	for c := 0; c < len(board[0]); c++ {
+		for r := 0; r < len(board)-3; r++ {
+			if board[r][c] == player && board[r+1][c] == player && board[r+2][c] == player && board[r+3][c] == player {
+				return true
+			}
+		}
+	}
+	for c := 0; c < len(board[0])-3; c++ {
+		for r := 1; r <= (len(board) - 3); r++ {
+			if board[r][c] == player && board[r+1][c+1] == player && board[r+2][c+2] == player && board[r+3][c+3] == player {
+				return true
+			}
+		}
+	}
+	for c := 0; c < len(board[0])-3; c++ {
+		for r := 3; r < len(board); r++ {
+			if board[r][c] == player && board[r-1][c+1] == player && board[r-2][c+2] == player && board[r-3][c+3] == player {
+				return true
+			}
+		}
+	}
+	return false
+}
+func checkIfColumnFull(board [][]uint8, column int) int {
+	for i := 0; i < len(board); i++ {
+		if board[i][column] == 0 {
+			return i
+		}
+	}
+	return -1
+}
+func printBoard(board [][]uint8) {
+	for i := 1; i <= len(board[0]); i++ {
+		fmt.Print("  " + strconv.FormatInt(int64(i), 10) + "  ")
+	}
+	fmt.Println()
+	for i := len(board) - 1; i >= 0; i-- {
+		for j := 0; j < len(board[i]); j++ {
+			var symbol = " "
+			if board[i][j] == 1 {
+				symbol = "◯"
+			} else if board[i][j] == 2 {
+				symbol = "⬤"
+			}
+			fmt.Print("{ " + symbol + " }")
+		}
+		fmt.Println()
+	}
+}
 func main() {
 	var xDefault, yDefault int = 6, 7
 	var x, y int = xDefault, yDefault
-	fmt.Println("Do you want to change board dimensions (6x7 is default): (y/n)")
 	var boardAnswer = ""
+	re := regexp.MustCompile(`^\d+$`)
+	fmt.Println("Do you want to change board dimensions (6x7 is default): (y/n)")
 	fmt.Scanln(&boardAnswer)
 	for boardAnswer != "y" && boardAnswer != "n" {
 		fmt.Println(boardAnswer + " is not valid (y/n)")
@@ -85,8 +143,44 @@ func main() {
 		board[i] = make([]uint8, y)
 	}
 	printInitBoard(x, y)
-	fmt.Println(board)
+	var column = ""
+	var currentplayer uint8 = 1
 	for !checkIfDraw(board) {
-
+		printBoard(board)
+		fmt.Println("Player " + strconv.FormatInt(int64(currentplayer), 10))
+		fmt.Scanln(&column)
+		if !re.MatchString(column) {
+			fmt.Println("Invalid input")
+			continue
+		} else {
+			columnNo, err := strconv.Atoi(column)
+			if err != nil {
+				fmt.Println("Error during conversion")
+				continue
+			}
+			if columnNo > y {
+				fmt.Println(column + " is bigger than number of columns on board " + strconv.FormatInt(int64(y), 10))
+				continue
+			} else {
+				emptyRow := checkIfColumnFull(board, columnNo-1)
+				if emptyRow == -1 {
+					fmt.Println("That column is full")
+					continue
+				} else {
+					board[emptyRow][columnNo-1] = currentplayer
+				}
+			}
+		}
+		if checkIfWon(board, currentplayer) {
+			printBoard(board)
+			fmt.Println("Player" + strconv.FormatInt(int64(currentplayer), 10) + " WON!!!")
+			return
+		}
+		if currentplayer == 1 {
+			currentplayer = 2
+		} else {
+			currentplayer = 1
+		}
 	}
+	fmt.Println("YAWN ITS DRAW!!")
 }
