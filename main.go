@@ -49,10 +49,23 @@ func getNewNumber(minX int, minY int) (int, int) {
 	}
 }
 func printInitBoard(x int, y int) {
-	for i := 1; i < x; i++ {
+	for i := 1; i <= y; i++ {
+		fmt.Print(" " + strconv.FormatInt(int64(i), 10) + " ")
+	}
+	fmt.Println()
+	for i := 1; i <= x; i++ {
 		fmt.Println(strings.Repeat("{ }", y))
 	}
-
+}
+func checkIfDraw(board [][]uint8) bool {
+	for i := range board {
+		for j := range board[i] {
+			if board[i][j] == 0 {
+				return false
+			}
+		}
+	}
+	return true
 }
 func main() {
 	var xDefault, yDefault int = 6, 7
@@ -67,5 +80,13 @@ func main() {
 	if boardAnswer == "y" {
 		x, y = getNewNumber(xDefault, yDefault)
 	}
+	board := make([][]uint8, x)
+	for i := range board {
+		board[i] = make([]uint8, y)
+	}
 	printInitBoard(x, y)
+	fmt.Println(board)
+	for !checkIfDraw(board) {
+
+	}
 }
