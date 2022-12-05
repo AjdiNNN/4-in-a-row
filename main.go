@@ -5,6 +5,7 @@ import (
 	"math"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 func getNewNumber(minX int, minY int) (int, int) {
@@ -47,7 +48,12 @@ func getNewNumber(minX int, minY int) (int, int) {
 		}
 	}
 }
+func printInitBoard(x int, y int) {
+	for i := 1; i < x; i++ {
+		fmt.Println(strings.Repeat("{ }", y))
+	}
 
+}
 func main() {
 	var xDefault, yDefault int = 6, 7
 	var x, y int = xDefault, yDefault
@@ -61,5 +67,5 @@ func main() {
 	if boardAnswer == "y" {
 		x, y = getNewNumber(xDefault, yDefault)
 	}
-	fmt.Println(x + y)
+	printInitBoard(x, y)
 }
