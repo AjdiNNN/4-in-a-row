@@ -9,12 +9,10 @@ import (
 
 func getNewNumber(minX int, minY int) (int, int) {
 	var new = ""
-	//var err error
-	//var newNo int
 	re := regexp.MustCompile(`(\d+)x(\d+)`)
 	fmt.Println("Type board dimensions rows must not be less than " + strconv.FormatInt(int64(minX), 10) + " and columns muss not be less than " + strconv.FormatInt(int64(minY), 10))
 	fmt.Println("Type in format (rows)x(columns) ex. 6x7 and values of rows and columns must not differ by more than 2")
-	for true {
+	for {
 		fmt.Scanln(&new)
 		if re.MatchString(new) {
 			value := re.FindAllStringSubmatch(new, 2)[0]
@@ -30,7 +28,7 @@ func getNewNumber(minX int, minY int) (int, int) {
 			}
 			if x >= 6 {
 				if y >= 7 {
-					if math.Abs(float64(x-y)) < 2 {
+					if math.Abs(float64(x-y)) <= 2 {
 						return x, y
 					} else {
 						fmt.Println("Rows and columns must not differ by more than 2")
@@ -48,9 +46,8 @@ func getNewNumber(minX int, minY int) (int, int) {
 			fmt.Println(new + " is invalid format please try with (rows)x(columns)")
 		}
 	}
-	fmt.Printf("String contains any match: %v\n", re.FindAllStringSubmatch(new, 2)) // True
-	return 0, 0
 }
+
 func main() {
 	var xDefault, yDefault int = 6, 7
 	var x, y int = xDefault, yDefault
