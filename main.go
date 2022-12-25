@@ -156,6 +156,7 @@ func main() {
 			fmt.Scanln(&boardAnswer)
 			history[0], history[1], dimensionArray = loadGame(boardAnswer)
 		}
+		fmt.Println(dimensionArray[0])
 		x = dimensionArray[0]
 		y = dimensionArray[1]
 	} else {
@@ -170,7 +171,8 @@ func main() {
 			x, y = getNewNumber(xDefault, yDefault)
 		}
 	}
-
+	fmt.Println(x)
+	fmt.Println(y)
 	board := make([][]uint8, x)
 	for i := range board {
 		board[i] = make([]uint8, y)
@@ -182,7 +184,7 @@ func main() {
 		}
 	}
 
-	fmt.Println("If u wish to save game do by typing save")
+	fmt.Println("If u wish to save game do by typing save instead of column number")
 
 	for !checkIfDraw(board) {
 
@@ -210,7 +212,7 @@ func main() {
 			check(err1)
 			err2 := os.WriteFile("saves/"+column+"/2", history[1], 0644)
 			check(err2)
-
+			dimensionArray = []byte{x, y}
 			err3 := os.WriteFile("saves/"+column+"/dimension", dimensionArray, 0644)
 			check(err3)
 			return
