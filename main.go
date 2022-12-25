@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"math"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
-func getNewNumber(minX int, minY int) (int, int) {
+func getNewNumber(minX uint8, minY uint8) (uint8, uint8) {
 	var new = ""
 	re := regexp.MustCompile(`(\d+)x(\d+)`)
 	fmt.Println("Type board dimensions rows must not be less than " + strconv.FormatInt(int64(minX), 10) + " and columns muss not be less than " + strconv.FormatInt(int64(minY), 10))
@@ -30,7 +31,7 @@ func getNewNumber(minX int, minY int) (int, int) {
 			if x >= 6 {
 				if y >= 7 {
 					if math.Abs(float64(x-y)) <= 2 {
-						return x, y
+						return uint8(x), uint8(y)
 					} else {
 						fmt.Println("Rows and columns must not differ by more than 2")
 						continue
@@ -46,15 +47,6 @@ func getNewNumber(minX int, minY int) (int, int) {
 		} else {
 			fmt.Println(new + " is invalid format please try with (rows)x(columns)")
 		}
-	}
-}
-func printInitBoard(x int, y int) {
-	for i := 1; i <= y; i++ {
-		fmt.Print(" " + strconv.FormatInt(int64(i), 10) + " ")
-	}
-	fmt.Println()
-	for i := 1; i <= x; i++ {
-		fmt.Println(strings.Repeat("{ }", y))
 	}
 }
 func checkIfDraw(board [][]uint8) bool {
@@ -124,32 +116,106 @@ func printBoard(board [][]uint8) {
 		fmt.Println()
 	}
 }
+func loadGame(name string) ([]uint8, []uint8, []byte) {
+	player1, e := os.ReadFile("saves/" + name + "/1")
+	player2, er := os.ReadFile("saves/" + name + "/2")
+	d, err := os.ReadFile("saves/" + name + "/dimension")
+	if e != nil || er != nil || err != nil {
+		fmt.Println(e)
+		fmt.Println(er)
+		fmt.Println(err)
+		return nil, nil, nil
+	}
+	return player1, player2, d
+}
 func main() {
-	var xDefault, yDefault int = 6, 7
-	var x, y int = xDefault, yDefault
+	var xDefault, yDefault uint8 = 6, 7
+	var x, y uint8 = xDefault, yDefault
 	var boardAnswer = ""
-	re := regexp.MustCompile(`^\d+$`)
-	fmt.Println("Do you want to change board dimensions (6x7 is default): (y/n)")
+	var column = ""
+	var currentplayer uint8 = 1
+	dimensionArray := []byte{x, y}
+	history := make([][]uint8, 2)
+
+	isColumn := regexp.MustCompile(`^\d+$`)
+	isValidAnswer := regexp.MustCompile(`[yn]$`)
+
+	fmt.Println("Do you want load game: (y/n)")
 	fmt.Scanln(&boardAnswer)
-	for boardAnswer != "y" && boardAnswer != "n" {
+
+	for !isValidAnswer.MatchString(boardAnswer) {
 		fmt.Println(boardAnswer + " is not valid (y/n)")
 		fmt.Scanln(&boardAnswer)
 	}
 	if boardAnswer == "y" {
-		x, y = getNewNumber(xDefault, yDefault)
+		fmt.Println("Type name of saved game")
+		fmt.Scanln(&boardAnswer)
+		history[0], history[1], dimensionArray = loadGame(boardAnswer)
+		for history[0] == nil {
+			fmt.Println("Type name of saved game")
+			fmt.Scanln(&boardAnswer)
+			history[0], history[1], dimensionArray = loadGame(boardAnswer)
+		}
+		x = dimensionArray[0]
+		y = dimensionArray[1]
+	} else {
+		fmt.Println("Do you want to change board dimensions (6x7 is default): (y/n)")
+		fmt.Scanln(&boardAnswer)
+
+		for !isValidAnswer.MatchString(boardAnswer) {
+			fmt.Println(boardAnswer + " is not valid (y/n)")
+			fmt.Scanln(&boardAnswer)
+		}
+		if boardAnswer == "y" {
+			x, y = getNewNumber(xDefault, yDefault)
+		}
 	}
+
 	board := make([][]uint8, x)
 	for i := range board {
 		board[i] = make([]uint8, y)
 	}
-	printInitBoard(x, y)
-	var column = ""
-	var currentplayer uint8 = 1
+	if history[0] != nil {
+		for i := 0; i < len(history[0])+len(history[1]); i++ {
+			emptyRow := checkIfColumnFull(board, int(history[int64(i%2)][int64(i/2)])-1)
+			board[emptyRow][int(history[int64(i%2)][int64(i/2)])-1] = uint8(i%2) + 1
+		}
+	}
+
+	fmt.Println("If u wish to save game do by typing save")
+
 	for !checkIfDraw(board) {
+
+		fmt.Print("Player 1:")
+		for i := 0; i < len(history[0]); i++ {
+			fmt.Print(" " + strconv.FormatInt(int64(history[0][i]), 10) + " ")
+		}
+		fmt.Println("")
+		fmt.Print("Player 2:")
+		for i := 0; i < len(history[1]); i++ {
+			fmt.Print(" " + strconv.FormatInt(int64(history[1][i]), 10) + " ")
+		}
+		fmt.Println("")
+		fmt.Println("**History**")
 		printBoard(board)
 		fmt.Println("Player " + strconv.FormatInt(int64(currentplayer), 10))
 		fmt.Scanln(&column)
-		if !re.MatchString(column) {
+		save := strings.Fields(column)
+		if save[0] == "save" {
+			fmt.Println("Give name to save")
+			fmt.Scanln(&column)
+			err := os.MkdirAll("saves/"+column, 0755)
+			check(err)
+			err1 := os.WriteFile("saves/"+column+"/1", history[0], 0644)
+			check(err1)
+			err2 := os.WriteFile("saves/"+column+"/2", history[1], 0644)
+			check(err2)
+
+			err3 := os.WriteFile("saves/"+column+"/dimension", dimensionArray, 0644)
+			check(err3)
+			return
+		}
+		if !isColumn.MatchString(column) {
 			fmt.Println("Invalid input")
 			continue
 		} else {
@@ -158,8 +224,8 @@ func main() {
 				fmt.Println("Error during conversion")
 				continue
 			}
-			if columnNo > y {
-				fmt.Println(column + " is bigger than number of columns on board " + strconv.FormatInt(int64(y), 10))
+			if uint8(columnNo) > y || uint8(columnNo) == 0 {
+				fmt.Println(column + "number is bigger than number of columns on board or it is 0" + strconv.FormatInt(int64(y), 10))
 				continue
 			} else {
 				emptyRow := checkIfColumnFull(board, columnNo-1)
@@ -167,6 +233,7 @@ func main() {
 					fmt.Println("That column is full")
 					continue
 				} else {
+					history[currentplayer-1] = append(history[currentplayer-1], uint8(columnNo))
 					board[emptyRow][columnNo-1] = currentplayer
 				}
 			}
@@ -183,4 +250,10 @@ func main() {
 		}
 	}
 	fmt.Println("YAWN ITS DRAW!!")
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
