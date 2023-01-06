@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func getNewNumber(minX uint8, minY uint8) (uint8, uint8) {
@@ -256,7 +257,17 @@ func main() {
 			}
 			if checkIfWon(board, currentplayer) {
 				printBoard(board)
-				fmt.Println("Player" + strconv.FormatInt(int64(currentplayer), 10) + " WON!!!")
+				for i := 0; i < 36; i++ {
+					fmt.Println(strings.Repeat(" ", i) + "Player " + strconv.FormatInt(int64(currentplayer), 10) + " WON")
+					time.Sleep(1 * time.Second / 6)
+					fmt.Print("\033[H\033[2J")
+				}
+				for i := 36; i > 0; i-- {
+					fmt.Println(strings.Repeat(" ", i) + "Player " + strconv.FormatInt(int64(currentplayer), 10) + " WON")
+					time.Sleep(1 * time.Second / 6)
+					fmt.Print("\033[H\033[2J")
+				}
+				fmt.Println("Player " + strconv.FormatInt(int64(currentplayer), 10) + " WON")
 				break
 			}
 			if checkIfDraw(board) {
@@ -269,7 +280,8 @@ func main() {
 				currentplayer = 1
 			}
 		}
-
+		printBoard(board)
+		fmt.Println()
 		fmt.Println("Want to play another game? (y/n)")
 		fmt.Scanln(&boardAnswer)
 
