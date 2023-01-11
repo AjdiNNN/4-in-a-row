@@ -11,7 +11,7 @@ The project was done as part of the **IT 305 Programming Languages** course at I
 
 ## Running the project
 
-To run the project, you will first need to install Scala. You can find detailed instructions [on this link](https://go.dev/doc/install). 
+To run the project, you will first need to install Go lang. You can find detailed instructions [on this link](https://go.dev/doc/install). 
 
 After installing Go lang, follow these steps to run the game:
 ```
