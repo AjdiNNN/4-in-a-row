@@ -4,11 +4,6 @@ Connect Four is a two-player connection board game, in which the players choose 
 
 The project was done as part of the **IT 305 Programming Languages** course at International Burch University, and implemented in the **Go lang** programming language.
 
-## Team members
-- [Ajdin Hukić](https://github.com/AjdiNNN)
-- [Adi Džumhur](https://github.com/adidzumhur)
-- [Ademir Hebibović](https://github.com/hebibovic99)
-
 ## Running the project
 
 To run the project, you will first need to install Go lang. You can find detailed instructions [on this link](https://go.dev/doc/install). 
